@@ -46,8 +46,6 @@ RUN set -x \
 # Add plugins
 RUN mkdir -p $SONARQUBE_HOME/extensions/plugins/
 
-ADD http://central.maven.org/maven2/org/sonarsource/java/sonar-java-plugin/${SONAR_JAVA_PLUGIN}/sonar-java-plugin-${SONAR_JAVA_PLUGIN}.jar $SONARQUBE_HOME/extensions/plugins/sonar-java-plugin-${SONAR_JAVA_PLUGIN}.jar
-
 ADD http://central.maven.org/maven2/org/sonarsource/php/sonar-php-plugin/${SONAR_PHP_PLUGIN}/sonar-java-plugin-${SONAR_PHP_PLUGIN}.jar $SONARQUBE_HOME/extensions/plugins/sonar-java-plugin-${SONAR_PHP_PLUGIN}.jar
 
 ADD http://central.maven.org/maven2/org/sonarsource/sonar-web-plugin/sonar-web-plugin/${SONAR_WEB_PLUGIN}/sonar-web-plugin-${SONAR_WEB_PLUGIN}.jar $SONARQUBE_HOME/extensions/plugins/sonar-web-plugin-${SONAR_WEB_PLUGIN}.jar

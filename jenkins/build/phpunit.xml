@@ -1,0 +1,62 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/5.2/phpunit.xsd"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         bootstrap="../vendor/autoload.php"
+         cacheTokens="false"
+         colors="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         forceCoversAnnotation="false"
+         mapTestClassNameToCoveredClassName="false"
+         printerClass="PHPUnit_TextUI_ResultPrinter"
+         printerFile="../vendor/phpunit/phpunit/src/Util/TestDox/ResultPrinter.php"
+         stopOnError="false"
+         stopOnFailure="false"
+         stopOnIncomplete="false"
+         stopOnSkipped="false"
+         stopOnRisky="false"
+         testSuiteLoaderClass="PHPUnit_Runner_StandardTestSuiteLoader"
+         testSuiteLoaderFile="../vendor/phpunit/phpunit/src/Runner/StandardTestSuiteLoader.php"
+         timeoutForSmallTests="1"
+         timeoutForMediumTests="10"
+         timeoutForLargeTests="60"
+         stderr="true"
+         verbose="false">
+           
+  <testsuites>
+    <testsuite name="PEPTIDE">
+      <directory>../tests/</directory>
+      <directory>../database/</directory>
+      <exclude>../tests/Peps/GetEnrichmentDataTest.php</exclude>
+      <exclude>../database/factories/</exclude>
+    </testsuite>
+  </testsuites>
+
+  <logging>
+        <log type="coverage-html" target="coverage"/>
+        <log type="coverage-clover" target="logs/clover.xml"/>
+        <log type="coverage-crap4j" target="logs/crap4j.xml"/>
+        <log type="coverage-xml" target="logs/coverage"/>
+        <log type="junit" target="logs/junit.xml"/>
+        <log type="testdox-html" target="testdox/index.html"/>
+    </logging>
+
+
+<filter>
+    <whitelist processUncoveredFilesFromWhitelist="true">
+     <directory>../app</directory>
+    <exclude>
+		<directory>../Resources</directory>
+                <directory>../tests</directory>
+                <directory>../bootstrap</directory>
+                <directory>../build</directory> 
+                <directory>../public</directory>      
+                <file>../bootstrap/autoload.php</file>
+              </exclude>
+    </whitelist>
+  </filter>
+</phpunit>

@@ -1,18 +1,18 @@
-def gitUrl = 'https://github.com/codecentric/conference-app'
+def gitUrl = 'git@128.199.87.138:root/pepcore.git'
 
-createCiJob("conference-app", gitUrl, "app/pom.xml")
-createSonarJob("conference-app", gitUrl, "app/pom.xml")
-createDockerBuildJob("conference-app", "app")
-createDockerStartJob("conference-app", "app", "48080")
-createDockerStopJob("conference-app", "app")
+createCiJob("peptide-app", gitUrl, "build.xml")
+createSonarJob("peptide-app", gitUrl, "build.xml")
+createDockerBuildJob("peptide-app", "app")
+createDockerStartJob("peptide-app", "app", "48080")
+createDockerStopJob("peptide-app", "app")
 
-createCiJob("conference-app-monitoring", gitUrl, "monitoring/pom.xml")
-createSonarJob("conference-app-monitoring", gitUrl, "monitoring/pom.xml")
-createDockerBuildJob("conference-app-monitoring", "monitoring")
-createDockerStartJob("conference-app-monitoring", "monitoring", "58080")
-createDockerStopJob("conference-app-monitoring", "monitoring")
+createCiJob("peptide-app-monitoring", gitUrl, "monitoring/pom.xml")
+createSonarJob("peptide-app-monitoring", gitUrl, "monitoring/pom.xml")
+createDockerBuildJob("peptide-app-monitoring", "monitoring")
+createDockerStartJob("peptide-app-monitoring", "monitoring", "58080")
+createDockerStopJob("peptide-app-monitoring", "monitoring")
 
-def createCiJob(def jobName, def gitUrl, def pomFile) {
+def createCiJob(def jobName, def gitUrl, def antFile) {
   job("${jobName}-1-ci") {
     parameters {
       stringParam("BRANCH", "master", "Define TAG or BRANCH to build from")
@@ -37,26 +37,20 @@ def createCiJob(def jobName, def gitUrl, def pomFile) {
       githubPush()
     }
     steps {
-      maven {
-          goals('clean versions:set -DnewVersion=DEV-\${BUILD_NUMBER}')
-          mavenInstallation('Maven 3.3.3')
-          rootPOM( pomFile )
+      ant {
+          goals('ant versions:set -DnewVersion=DEV-\${BUILD_NUMBER}')
+          mavenInstallation('ant')
+          rootPOM( antFile )
           mavenOpts('-Xms512m -Xmx1024m')
           providedGlobalSettings('MyGlobalSettings')
       }
-      maven {
-        goals('clean deploy')
-        mavenInstallation('Maven 3.3.3')
-        rootPOM(pomFile)
-        mavenOpts('-Xms512m -Xmx1024m')
-        providedGlobalSettings('MyGlobalSettings')
-      }
+      
     }
     publishers {
       chucknorris()
       archiveXUnit {
         jUnit {
-          pattern('**/target/surefire-reports/*.xml')
+          pattern('build/logs/junit.xml')
           skipNoTestFiles(true)
           stopProcessingIfError(true)
         }
@@ -73,7 +67,7 @@ def createCiJob(def jobName, def gitUrl, def pomFile) {
   }
 }
 
-def createSonarJob(def jobName, def gitUrl, def pomFile) {
+def createSonarJob(def jobName, def gitUrl, def antFile) {
   job("${jobName}-2-sonar") {
     parameters {
       stringParam("BRANCH", "master", "Define TAG or BRANCH to build from")
@@ -86,18 +80,18 @@ def createSonarJob(def jobName, def gitUrl, def pomFile) {
       preBuildCleanup()
     }
     steps {
-      maven {
+      ant {
       
         goals('org.sonar.plugins.clover.CloverPlugin:2.4:prepare-agent install -Psonar')
-        mavenInstallation('Maven 3.3.3')
-        rootPOM(pomFile)
+        mavenInstallation('ant')
+        rootPOM(antFile)
         mavenOpts('-Xms512m -Xmx1024m')
         providedGlobalSettings('MyGlobalSettings')
       }
-      maven {
-        goals('sonar:sonar -Psonar')
-        mavenInstallation('Maven 3.3.3')
-        rootPOM(pomFile)
+      ant {
+        goals('ant sonar')
+        mavenInstallation('ant')
+        rootPOM(antFile)
         mavenOpts('-Xms512m -Xmx1024m')
         providedGlobalSettings('MyGlobalSettings')
       }
@@ -130,7 +124,7 @@ def createDockerBuildJob(def jobName, def folder) {
     }
     steps {
       steps {
-        shell("cd ${folder} && sudo /usr/bin/docker build -t conference-${folder} .")
+        shell("cd ${folder} && sudo /usr/bin/docker build -t peptide-${folder} .")
       }
     }
     publishers {
@@ -159,10 +153,10 @@ def createDockerStartJob(def jobName, def folder, def port) {
     steps {
       steps {
         shell('echo "Stopping Docker Container first"')
-        shell("sudo /usr/bin/docker stop \$(sudo /usr/bin/docker ps -a -q --filter=\"name=conference-${folder}\") | true ")
-        shell("sudo /usr/bin/docker rm \$(sudo /usr/bin/docker ps -a -q --filter=\"name=conference-${folder}\") | true ")
+        shell("sudo /usr/bin/docker stop \$(sudo /usr/bin/docker ps -a -q --filter=\"name=peptide-${folder}\") | true ")
+        shell("sudo /usr/bin/docker rm \$(sudo /usr/bin/docker ps -a -q --filter=\"name=peptide-${folder}\") | true ")
         shell('echo "Starting Docker Container"')
-        shell("sudo /usr/bin/docker run -d --name conference-${folder} -p=${port}:8080 conference-${folder}")
+        shell("sudo /usr/bin/docker run -d --name peptide-${folder} -p=${port}:8080 peptide-${folder}")
       }
     }
     publishers {
@@ -183,8 +177,8 @@ def createDockerStopJob(def jobName, def folder) {
     }
     steps {
       steps {
-        shell("sudo /usr/bin/docker stop \$(sudo /usr/bin/docker ps -a -q --filter=\"name=conference-${folder}\")")
-        shell("sudo /usr/bin/docker rm \$(sudo /usr/bin/docker ps -a -q --filter=\"name=conference-${folder}\")")
+        shell("sudo /usr/bin/docker stop \$(sudo /usr/bin/docker ps -a -q --filter=\"name=peptide-${folder}\")")
+        shell("sudo /usr/bin/docker rm \$(sudo /usr/bin/docker ps -a -q --filter=\"name=peptide-${folder}\")")
       }
     }
     publishers {
@@ -196,19 +190,19 @@ def createDockerStopJob(def jobName, def folder) {
 buildPipelineView('Pipeline') {
     filterBuildQueue()
     filterExecutors()
-    title('Conference App CI Pipeline')
+    title('PEPTIDE App CI Pipeline')
     displayedBuilds(5)
-    selectedJob("conference-app-1-ci")
+    selectedJob("peptide-app-1-ci")
     alwaysAllowManualTrigger()
     refreshFrequency(60)
 }
 
-listView('Conference App') {
+listView('PEPTIDE App') {
     description('')
     filterBuildQueue()
     filterExecutors()
     jobs {
-        regex(/conference-app-.*/)
+        regex(/peptide-app-.*/)
     }
     columns {
         status()
@@ -220,3 +214,4 @@ listView('Conference App') {
         lastDuration()
     }
 }
+ 

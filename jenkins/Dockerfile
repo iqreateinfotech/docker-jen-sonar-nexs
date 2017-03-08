@@ -6,6 +6,8 @@ RUN apt-get update \
       && rm -rf /var/lib/apt/lists/*
 RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
 
+RUN apt-get install php-pecl-xdebug
+
 # getting the docker-cli
 # --- Attention: docker.sock needs to be mounted as volume in docker-compose.yml
 # see: https://issues.jenkins-ci.org/browse/JENKINS-35025
@@ -21,9 +23,10 @@ COPY plugins.txt /var/jenkins_home/plugins.txt
 RUN /usr/local/bin/plugins.sh /var/jenkins_home/plugins.txt
 
 # Adding default Jenkins Jobs
+
 COPY jobs/1-github-seed-job.xml /usr/share/jenkins/ref/jobs/1-github-seed-job/config.xml
 COPY jobs/2-job-dsl-seed-job.xml /usr/share/jenkins/ref/jobs/2-job-dsl-seed-job/config.xml
-COPY jobs/3-conference-app-seed-job.xml /usr/share/jenkins/ref/jobs/3-conference-app-seed-job/config.xml
+COPY jobs/3-pepcoreapp-seed-job.xml /usr/share/jenkins/ref/jobs/3-pepcoreapp-seed-job/config.xml
 COPY jobs/4-selenium2-seed-job.xml /usr/share/jenkins/ref/jobs/4-selenium2-seed-job/config.xml
 COPY jobs/5-docker-admin-seed-job.xml /usr/share/jenkins/ref/jobs/5-docker-admin-seed-job/config.xml
 
@@ -42,6 +45,12 @@ COPY config/maven-global-settings-files.xml /usr/share/jenkins/ref/maven-global-
 COPY config/credentials.xml /usr/share/jenkins/ref/credentials.xml
 COPY config/ssh-keys/cd-demo /usr/share/jenkins/ref/.ssh/id_rsa
 COPY config/ssh-keys/cd-demo.pub /usr/share/jenkins/ref/.ssh/id_rsa.pub
+
+# copy ant build and phpunit file
+COPY build/phpunit.xml /usr/share/jenkins/ref/jobs/3-pepcoreapp-seed-job/build/phpunit.xml
+COPY build/phpdox.xml /usr/share/jenkins/ref/jobs/3-pepcoreapp-seed-job/build/phpdox.xml
+COPY build/phpmd.xml /usr/share/jenkins/ref/jobs/3-pepcoreapp-seed-job/build/phpmd.xml
+COPY build/phpcs.xml /usr/share/jenkins/ref/jobs/3-pepcoreapp-seed-job/build/phpcs.xml
 
 # tell Jenkins that no banner prompt for pipeline plugins is needed
 # see: https://github.com/jenkinsci/docker#preinstalling-plugins
